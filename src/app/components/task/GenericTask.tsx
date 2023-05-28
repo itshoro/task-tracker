@@ -47,6 +47,7 @@ const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
 
   return (
     <li
+      className="group"
       tabIndex={-1}
       onKeyDown={(e) => {
         switch (e.key) {
@@ -72,16 +73,25 @@ const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
       }}
       {...props}
     >
-      <div>
-        <span>{format(task.createdAt, "HH:mm")}</span>
-        <span className="select-none">&middot;</span>
-        <span>{task.title}</span>
-        <TaskTimer ms={(task.completedAt ?? now) - task.createdAt} />
-        {editing ? (
-          <textarea ref={editorRef} defaultValue={task.note} />
-        ) : (
-          task.note && <blockquote>{task.note}</blockquote>
-        )}
+      <div className="-mx-2 px-2 py-3 rounded-lg border-2 border-transparent group-focus:border-stone-600 text-stone-500">
+        <div className="grid grid-cols-[auto,_minmax(0,_1fr),_auto] gap-4">
+          <div className="flex gap-4">
+            <span>{format(task.createdAt, "HH:mm")}</span>
+            <span className="select-none">&middot;</span>
+          </div>
+          <span className="flex gap-2 text-white">{task.title}</span>
+          <TaskTimer
+            className={`ml-auto ${
+              task.completedAt === undefined ? "text-white" : "text-stone-500"
+            }`}
+            ms={(task.completedAt ?? now) - task.createdAt}
+          />
+          {editing ? (
+            <textarea ref={editorRef} defaultValue={task.note} />
+          ) : (
+            task.note && <blockquote>{task.note}</blockquote>
+          )}
+        </div>
       </div>
     </li>
   );
