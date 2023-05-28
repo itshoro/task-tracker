@@ -4,6 +4,7 @@ import { type FormEvent, useRef, useState } from "react";
 import { type TaskProps, taskFromInput, GenericTask } from "./task";
 import { useWindowEvent } from "@/hooks/useWindowEvent";
 import { CumulativeTimer } from "./timer/CumulativeTimer";
+import { TaskInput } from "./TaskInput";
 
 const TasksView = () => {
   const focusedTask = useRef<number>();
@@ -16,6 +17,7 @@ const TasksView = () => {
     const input = (inputRef.current?.value ?? "").trim();
 
     if (input) {
+      inputRef.current!.value = "";
       setTasks((tasks) => {
         if (tasks.length > 0 && tasks[0].completedAt === undefined) {
           tasks[0].completedAt = Date.now();
@@ -70,8 +72,14 @@ const TasksView = () => {
 
     switch (e.key) {
       case "Escape": {
-        focusedTask.current = undefined;
-        (document.activeElement as HTMLElement).blur();
+        if (focusedTask.current !== undefined) {
+          focusedTask.current = undefined;
+          (document.activeElement as HTMLElement).blur();
+        } else if (inputRef.current && inputRef.current.value) {
+          inputRef.current.value = "";
+        } else {
+          (document.activeElement as HTMLElement).blur();
+        }
         break;
       }
       case "ArrowDown": {
@@ -101,7 +109,7 @@ const TasksView = () => {
     <>
       <CumulativeTimer tasks={tasks} />
       <form onSubmit={submitNewTask}>
-        <input autoFocus type="text" ref={inputRef} />
+        <TaskInput type="text" ref={inputRef} />
       </form>
       <ol
         ref={listRef}
