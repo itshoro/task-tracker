@@ -3,6 +3,7 @@
 import { type FormEvent, useRef, useState } from "react";
 import { type TaskProps, taskFromInput, GenericTask } from "./task";
 import { useWindowEvent } from "@/hooks/useWindowEvent";
+import { CumulativeTimer } from "./timer/CumulativeTimer";
 
 const TasksView = () => {
   const focusedTask = useRef<number>();
@@ -85,6 +86,7 @@ const TasksView = () => {
 
   return (
     <>
+      <CumulativeTimer tasks={tasks} />
       <form onSubmit={submitNewTask}>
         <input autoFocus type="text" ref={inputRef} />
       </form>
