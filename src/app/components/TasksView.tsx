@@ -99,7 +99,7 @@ const TasksView = () => {
         }}
       >
         {tasks.map((task) => (
-          <GenericTask key={task.id} {...task} />
+          <GenericTask key={task.id} task={task} />
         ))}
       </ol>
     </>
