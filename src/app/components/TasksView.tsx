@@ -16,7 +16,12 @@ const TasksView = () => {
     const input = (inputRef.current?.value ?? "").trim();
 
     if (input) {
-      setTasks((tasks) => [...tasks, taskFromInput(input)]);
+      setTasks((tasks) => {
+        if (tasks.length > 0 && tasks[0].completedAt === undefined) {
+          tasks[0].completedAt = Date.now();
+        }
+        return [taskFromInput(input), ...tasks];
+      });
     }
   };
 
