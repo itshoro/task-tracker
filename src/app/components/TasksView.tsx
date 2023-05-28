@@ -25,6 +25,14 @@ const TasksView = () => {
     }
   };
 
+  function updateTask(task: TaskProps) {
+    setTasks((tasks) => {
+      const index = tasks.findIndex((t) => t.id === task.id);
+      tasks = [...tasks.slice(0, index), task, ...tasks.slice(index + 1)];
+      return tasks;
+    });
+  }
+
   function next() {
     if (tasks.length === 0) return;
 
@@ -104,7 +112,7 @@ const TasksView = () => {
         }}
       >
         {tasks.map((task) => (
-          <GenericTask key={task.id} task={task} />
+          <GenericTask key={task.id} task={task} onUpdateSelf={updateTask} />
         ))}
       </ol>
     </>
