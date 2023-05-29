@@ -86,12 +86,12 @@ const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
             }`}
             ms={(task.completedAt ?? now) - task.createdAt}
           />
-          {editing ? (
-            <textarea ref={editorRef} defaultValue={task.note} />
-          ) : (
-            task.note && <blockquote>{task.note}</blockquote>
-          )}
         </div>
+        {editing ? (
+          <textarea ref={editorRef} defaultValue={task.note} />
+        ) : (
+          task.note && <div onClick={() => setEditing(true)}>{task.note}</div>
+        )}
       </div>
     </li>
   );

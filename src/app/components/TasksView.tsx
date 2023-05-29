@@ -1,14 +1,18 @@
 "use client";
 
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useRef } from "react";
 import { type TaskProps, taskFromInput, GenericTask } from "./task";
 import { useWindowEvent } from "@/hooks/useWindowEvent";
 import { CumulativeTimer } from "./timer/CumulativeTimer";
 import { TaskInput } from "./TaskInput";
+import usePersistedState from "@/hooks/usePersistedState";
 
 const TasksView = () => {
   const focusedTask = useRef<number>();
-  const [tasks, setTasks] = useState<TaskProps[]>([]);
+  const [tasksPending, tasks, setTasks] = usePersistedState<TaskProps[]>(
+    "persisted:tasks",
+    []
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
 
@@ -115,19 +119,39 @@ const TasksView = () => {
           <TaskInput type="text" ref={inputRef} />
         </form>
       </section>
-      <ol
-        ref={listRef}
-        onBlur={(e) => {
-          if (!listRef.current?.contains(e.relatedTarget)) {
-            focusedTask.current = undefined;
-          }
-        }}
-      >
-        {tasks.map((task) => (
-          <GenericTask key={task.id} task={task} onUpdateSelf={updateTask} />
-        ))}
-      </ol>
+      {tasksPending ? (
+        <TasksPending />
+      ) : (
+        <ol
+          ref={listRef}
+          onBlur={(e) => {
+            if (!listRef.current?.contains(e.relatedTarget)) {
+              focusedTask.current = undefined;
+            }
+          }}
+        >
+          {tasks.map((task) => (
+            <GenericTask key={task.id} task={task} onUpdateSelf={updateTask} />
+          ))}
+        </ol>
+      )}
     </>
+  );
+};
+
+const TasksPending = () => {
+  return (
+    <div className="pt-24 px-6 pb-24 space-y-4 overflow-hidden">
+      <div className="sr-only">Loading...</div>
+      {Array(5)
+        .fill(0)
+        .map((_, i) => (
+          <div
+            key={i}
+            className="h-12 w-full rounded-xl bg-stone-800 animate-pulse"
+          />
+        ))}
+    </div>
   );
 };
 
