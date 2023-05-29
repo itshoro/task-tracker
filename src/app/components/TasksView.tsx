@@ -107,10 +107,14 @@ const TasksView = () => {
 
   return (
     <>
-      <CumulativeTimer tasks={tasks} />
-      <form onSubmit={submitNewTask}>
-        <TaskInput type="text" ref={inputRef} />
-      </form>
+      <section>
+        <div className="text-center py-8">
+          <CumulativeTimer tasks={tasks} />
+        </div>
+        <form onSubmit={submitNewTask}>
+          <TaskInput type="text" ref={inputRef} />
+        </form>
+      </section>
       <ol
         ref={listRef}
         onBlur={(e) => {

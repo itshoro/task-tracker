@@ -40,8 +40,8 @@ const CumulativeTimer = ({ tasks }: CumulativeTimerProps) => {
 
   return (
     <>
-      <div>Time spent</div>
-      <div className="tabular-nums">
+      <div className="text-sm">Time spent</div>
+      <div className="tabular-nums font-medium text-lg">
         {Object.keys(time)
           .map(
             (unit) =>
