@@ -34,7 +34,7 @@ const GenericTask = ({ task, onEdit, ...props }: GenericTaskProps) => {
 
   return (
     <li
-      className="group outline-none"
+      className="group outline-none my-0.5"
       tabIndex={-1}
       onKeyDown={(e) => {
         switch (e.key) {
@@ -48,7 +48,7 @@ const GenericTask = ({ task, onEdit, ...props }: GenericTaskProps) => {
       ref={ref}
       {...props}
     >
-      <div className="-mx-2 px-2 py-3 rounded-lg border-2 border-transparent group-focus:border-stone-600 text-stone-500">
+      <div className="-mx-2 px-2 py-3 rounded-lg group-focus:ring-2 ring-stone-600 text-stone-500">
         <div className="grid grid-cols-[auto,_minmax(0,_1fr),_auto] gap-4">
           <div className="flex gap-4">
             <span>{format(task.createdAt, "HH:mm")}</span>

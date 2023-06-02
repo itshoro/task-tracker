@@ -7,6 +7,7 @@ import { CumulativeTimer } from "./timer/CumulativeTimer";
 import { TaskInput } from "./TaskInput";
 import usePersistedState from "@/hooks/usePersistedState";
 import TaskEditDialog from "./dialog/TaskEditDialog";
+import BreakTask from "./task/BreakTask";
 
 const TasksView = () => {
   const focusedTask = useRef<number>();
@@ -160,9 +161,24 @@ const TasksView = () => {
                 focusedTask.current = undefined;
               }}
             >
-              {tasks.map((task) => (
-                <GenericTask key={task.id} task={task} onEdit={openDialog} />
-              ))}
+              {tasks.map((task, i) => {
+                if (task.type === "break")
+                  return (
+                    <BreakTask
+                      key={task.id}
+                      task={task}
+                      onClick={() => setFocusedTask(i)}
+                    />
+                  );
+                return (
+                  <GenericTask
+                    key={task.id}
+                    task={task}
+                    onEdit={openDialog}
+                    onClick={() => setFocusedTask(i)}
+                  />
+                );
+              })}
             </ol>
           </section>
 

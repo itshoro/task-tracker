@@ -2,7 +2,7 @@ import GenericTask from "./GenericTask";
 
 type TaskProps = {
   id: string;
-  type: "task";
+  type: "task" | "break";
   title: string;
   note?: string;
   createdAt: number;
@@ -15,7 +15,7 @@ function taskFromInput(input: string) {
   return {
     id: crypto.randomUUID(),
     title: input,
-    type: "task",
+    type: input !== "/break" ? "task" : "break",
     createdAt: now,
   } satisfies TaskProps;
 }
