@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useRef, useState } from "react";
+import { type FormEvent, useRef, useState, useEffect } from "react";
 import { type TaskProps, taskFromInput, GenericTask } from "./task";
 import { useWindowEvent } from "@/hooks/useWindowEvent";
 import { CumulativeTimer } from "./timer/CumulativeTimer";
@@ -18,6 +18,11 @@ const TasksView = () => {
   );
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
+
+  useEffect(() => {
+    if (!focusedTask.current || !listRef.current) return;
+    setFocusedTask(Math.min(focusedTask.current, tasks.length - 1));
+  }, [tasks]);
 
   function submitNewTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -63,7 +68,6 @@ const TasksView = () => {
   }
 
   useWindowEvent("keydown", (e) => {
-    console.log(dialogTask);
     if (dialogTask !== undefined) return;
 
     switch (e.key) {
@@ -78,18 +82,14 @@ const TasksView = () => {
         break;
       }
       case "Delete": {
-        const focused = focusedTask.current;
-        if (focused === undefined) return;
+        if (focusedTask.current === undefined) return;
 
         e.preventDefault();
-        setTasks((tasks) => {
-          queueMicrotask(() => {
-            if (focused < tasks.length - 1) setFocusedTask(focused);
-            else setFocusedTask(focused - 1);
-          });
+        setTasks((tasks) => [
+          ...tasks.slice(0, focusedTask.current!),
+          ...tasks.slice(focusedTask.current! + 1),
+        ]);
 
-          return [...tasks.slice(0, focused), ...tasks.slice(focused + 1)];
-        });
         break;
       }
       case "ArrowDown": {
