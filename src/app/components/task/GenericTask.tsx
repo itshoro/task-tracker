@@ -3,7 +3,6 @@ import {
   useEffect,
   useState,
   useRef,
-  useLayoutEffect,
 } from "react";
 import type { TaskProps } from ".";
 import { useSynchronizedInterval } from "@/hooks/useSynchronizedInterval";
@@ -12,7 +11,7 @@ import { TaskTimer } from "../timer/TaskTimer";
 
 type GenericTaskProps = {
   task: TaskProps;
-  onUpdateSelf: (task: TaskProps) => void;
+  onEdit: (task: TaskProps) => void;
 } & ComponentPropsWithoutRef<"li">;
 
 function useNowIfTaskPending(task: TaskProps) {
@@ -29,21 +28,9 @@ function useNowIfTaskPending(task: TaskProps) {
   return now;
 }
 
-const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
+const GenericTask = ({ task, onEdit, ...props }: GenericTaskProps) => {
+  const ref = useRef<HTMLLIElement>(null);
   const now = useNowIfTaskPending(task);
-
-  const [editing, setEditing] = useState(false);
-  const editorRef = useRef<HTMLTextAreaElement>(null);
-
-  useLayoutEffect(() => {
-    if (editing) {
-      queueMicrotask(() => {
-        editorRef.current!.focus();
-        editorRef.current!.selectionStart = editorRef.current!.value.length;
-        editorRef.current!.selectionEnd = editorRef.current!.value.length;
-      });
-    }
-  }, [editing]);
 
   return (
     <li
@@ -51,26 +38,14 @@ const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
       tabIndex={-1}
       onKeyDown={(e) => {
         switch (e.key) {
-          case "Escape":
-            setEditing(false);
-            break;
           case "Enter":
             if (e.shiftKey) break;
             e.preventDefault();
-
-            setEditing((editing) => {
-              if (
-                editing &&
-                editorRef.current &&
-                editorRef.current.value !== task.note
-              ) {
-                onUpdateSelf({ ...task, note: editorRef.current.value });
-              }
-              return !editing;
-            });
+            onEdit(task);
             break;
         }
       }}
+      ref={ref}
       {...props}
     >
       <div className="-mx-2 px-2 py-3 rounded-lg border-2 border-transparent group-focus:border-stone-600 text-stone-500">
@@ -87,11 +62,7 @@ const GenericTask = ({ task, onUpdateSelf, ...props }: GenericTaskProps) => {
             ms={(task.completedAt ?? now) - task.createdAt}
           />
         </div>
-        {editing ? (
-          <textarea ref={editorRef} defaultValue={task.note} />
-        ) : (
-          task.note && <div onClick={() => setEditing(true)}>{task.note}</div>
-        )}
+        <div>{task.note}</div>
       </div>
     </li>
   );

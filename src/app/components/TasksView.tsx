@@ -1,14 +1,17 @@
 "use client";
 
-import { type FormEvent, useRef } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { type TaskProps, taskFromInput, GenericTask } from "./task";
 import { useWindowEvent } from "@/hooks/useWindowEvent";
 import { CumulativeTimer } from "./timer/CumulativeTimer";
 import { TaskInput } from "./TaskInput";
 import usePersistedState from "@/hooks/usePersistedState";
+import TaskEditDialog from "./dialog/TaskEditDialog";
 
 const TasksView = () => {
   const focusedTask = useRef<number>();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [dialogTask, setDialogTask] = useState<TaskProps>();
   const [tasksPending, tasks, setTasks] = usePersistedState<TaskProps[]>(
     "persisted:tasks",
     []
@@ -16,7 +19,7 @@ const TasksView = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
 
-  const submitNewTask = (e: FormEvent<HTMLFormElement>) => {
+  function submitNewTask(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const input = (inputRef.current?.value ?? "").trim();
 
@@ -29,56 +32,44 @@ const TasksView = () => {
         return [taskFromInput(input), ...tasks];
       });
     }
-  };
+  }
 
-  function updateTask(task: TaskProps) {
-    setTasks((tasks) => {
-      const index = tasks.findIndex((t) => t.id === task.id);
-      tasks = [...tasks.slice(0, index), task, ...tasks.slice(index + 1)];
-      return tasks;
+  function setFocusedTask(index?: number) {
+    if (typeof index === "number" && index < tasks.length && index >= 0) {
+      focusedTask.current = index;
+      (listRef.current?.children[focusedTask.current] as HTMLElement).focus();
+    } else {
+      focusedTask.current = undefined;
+      (document.activeElement! as HTMLElement).blur();
+    }
+  }
+
+  function openDialog(task: TaskProps) {
+    setDialogTask(task);
+    queueMicrotask(() => {
+      dialogRef.current?.showModal();
     });
   }
 
   function next() {
-    if (tasks.length === 0) return;
-
-    focusedTask.current =
-      focusedTask.current !== undefined
-        ? Math.min(focusedTask.current + 1, tasks.length - 1)
-        : 0;
-
-    const targetElement = listRef.current!.children[
-      focusedTask.current
-    ] as HTMLLIElement;
-    targetElement.focus();
+    if (tasks.length === 0) setFocusedTask(undefined);
+    else if (focusedTask.current === undefined) setFocusedTask(0);
+    else setFocusedTask(Math.min(focusedTask.current + 1, tasks.length - 1));
   }
 
   function prev() {
     if (focusedTask.current === undefined) return;
-
-    if (focusedTask.current === 0) {
-      focusedTask.current = undefined;
-      (document.activeElement as HTMLElement).blur();
-      return;
-    }
-
-    focusedTask.current = Math.max(focusedTask.current - 1, 0);
-    const targetElement = listRef.current!.children[
-      focusedTask.current
-    ] as HTMLLIElement;
-    targetElement.focus();
+    setFocusedTask(focusedTask.current - 1);
   }
 
   useWindowEvent("keydown", (e) => {
-    if (focusedTask.current === undefined) {
-      inputRef.current!.focus();
-    }
+    console.log(dialogTask);
+    if (dialogTask !== undefined) return;
 
     switch (e.key) {
       case "Escape": {
         if (focusedTask.current !== undefined) {
-          focusedTask.current = undefined;
-          (document.activeElement as HTMLElement).blur();
+          setFocusedTask(undefined);
         } else if (inputRef.current && inputRef.current.value) {
           inputRef.current.value = "";
         } else {
@@ -86,24 +77,43 @@ const TasksView = () => {
         }
         break;
       }
+      case "Delete": {
+        const focused = focusedTask.current;
+        if (focused === undefined) return;
+
+        e.preventDefault();
+        setTasks((tasks) => {
+          queueMicrotask(() => {
+            if (focused < tasks.length - 1) setFocusedTask(focused);
+            else setFocusedTask(focused - 1);
+          });
+
+          return [...tasks.slice(0, focused), ...tasks.slice(focused + 1)];
+        });
+        break;
+      }
       case "ArrowDown": {
+        e.preventDefault();
         next();
         break;
       }
       case "ArrowUp": {
+        e.preventDefault();
         prev();
         break;
       }
       case "Home": {
-        if (tasks.length === 0) break;
-        focusedTask.current = 0;
-        (listRef.current!.children[focusedTask.current] as HTMLElement).focus();
+        e.preventDefault();
+        setFocusedTask(0);
         break;
       }
       case "End": {
-        if (tasks.length === 0) break;
-        focusedTask.current = tasks.length - 1;
-        (listRef.current!.children[focusedTask.current] as HTMLElement).focus();
+        e.preventDefault();
+        setFocusedTask(tasks.length - 1);
+        break;
+      }
+      default: {
+        inputRef.current!.focus();
         break;
       }
     }
@@ -111,7 +121,7 @@ const TasksView = () => {
 
   return (
     <>
-      <section>
+      <section className="px-6">
         <div className="text-center py-8">
           <CumulativeTimer tasks={tasks} />
         </div>
@@ -122,18 +132,62 @@ const TasksView = () => {
       {tasksPending ? (
         <TasksPending />
       ) : (
-        <ol
-          ref={listRef}
-          onBlur={(e) => {
-            if (!listRef.current?.contains(e.relatedTarget)) {
-              focusedTask.current = undefined;
-            }
-          }}
-        >
-          {tasks.map((task) => (
-            <GenericTask key={task.id} task={task} onUpdateSelf={updateTask} />
-          ))}
-        </ol>
+        <>
+          <section className="overflow-y-scroll">
+            <header className="sticky top-0 pointer-events-none z-40">
+              <div className="text-sm font-medium text-stone-400 bg-stone-50 dark:bg-neutral-900 px-6">
+                <div className="border-b dark:border-stone-700 flex justify-between pb-2">
+                  <span>Task</span>
+                  <span>Time Elapsed</span>
+                </div>
+              </div>
+              <div className="absolute h-8 w-full bg-gradient-to-b from-stone-50 dark:from-neutral-900" />
+            </header>
+            <div className="fixed h-8 bottom-0 w-full bg-gradient-to-t from-stone-50 dark:from-neutral-900 pointer-events-none" />
+
+            <ol
+              className="py-8 px-6"
+              ref={listRef}
+              onBlur={(e) => {
+                if (
+                  dialogTask !== undefined ||
+                  listRef.current?.contains(e.relatedTarget)
+                )
+                  // Keep track of the focused element, when we have the edit dialog
+                  // open or if the focused element is part of this ol.
+                  return;
+
+                focusedTask.current = undefined;
+              }}
+            >
+              {tasks.map((task) => (
+                <GenericTask key={task.id} task={task} onEdit={openDialog} />
+              ))}
+            </ol>
+          </section>
+
+          {dialogTask && (
+            <TaskEditDialog
+              ref={dialogRef}
+              task={dialogTask}
+              onClose={() => {
+                setDialogTask(undefined);
+              }}
+              onSubmit={(task) => {
+                setDialogTask(undefined);
+                setTasks((tasks) => {
+                  const index = tasks.findIndex((t) => task.id === t.id);
+
+                  return [
+                    ...tasks.slice(0, index),
+                    task,
+                    ...tasks.slice(index + 1),
+                  ];
+                });
+              }}
+            />
+          )}
+        </>
       )}
     </>
   );
