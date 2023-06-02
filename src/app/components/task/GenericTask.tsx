@@ -34,7 +34,7 @@ const GenericTask = ({ task, onEdit, ...props }: GenericTaskProps) => {
 
   return (
     <li
-      className="group"
+      className="group outline-none"
       tabIndex={-1}
       onKeyDown={(e) => {
         switch (e.key) {
