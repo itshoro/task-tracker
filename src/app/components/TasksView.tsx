@@ -21,7 +21,8 @@ const TasksView = () => {
   const listRef = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
-    if (!focusedTask.current || !listRef.current) return;
+    if (focusedTask.current === undefined || !listRef.current) return;
+
     setFocusedTask(Math.min(focusedTask.current, tasks.length - 1));
   }, [tasks]);
 
