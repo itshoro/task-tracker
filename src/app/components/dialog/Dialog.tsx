@@ -1,8 +1,13 @@
-import { type ReactNode, type RefObject, forwardRef } from "react";
+import {
+  type ReactNode,
+  type RefObject,
+  forwardRef,
+  type FormEvent,
+} from "react";
 
 type DialogProps = {
   children: ReactNode;
-  onSubmit: () => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
   onClose: () => void;
 };
