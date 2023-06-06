@@ -91,7 +91,20 @@ const TasksView = () => {
           ...tasks.slice(0, focusedTask.current!),
           ...tasks.slice(focusedTask.current! + 1),
         ]);
-
+        break;
+      }
+      case " ": {
+        if (
+          focusedTask.current === undefined ||
+          tasks[focusedTask.current!].completedAt !== undefined
+        )
+          return;
+        e.preventDefault();
+        setTasks((tasks) => [
+          ...tasks.slice(0, focusedTask.current!),
+          { ...tasks[focusedTask.current!], completedAt: Date.now() },
+          ...tasks.slice(focusedTask.current! + 1),
+        ]);
         break;
       }
       case "ArrowDown": {
