@@ -62,9 +62,31 @@ const GenericTask = ({ task, onEdit, ...props }: GenericTaskProps) => {
             ms={(task.completedAt ?? now) - task.createdAt}
           />
         </div>
-        <div>{task.note}</div>
+        <Note note={task.note} />
       </div>
     </li>
+  );
+};
+
+type NoteProps = {
+  note?: string;
+};
+const Note = ({ note }: NoteProps) => {
+  if (note === undefined) return null;
+
+  return (
+    <div className="relative rounded-xl bg-stone-950 p-4 text-stone-400 mt-6 -mx-2">
+      <div className="absolute -top-3 left-4 h-6 w-6 rounded-tl-md bg-stone-950 rotate-45 -z-10" />
+      <ul className="list-disc pl-6 marker:text-stone-700">
+        {note
+          .split(/[\-\*\n]/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            return <li key={line}>{line.trim()}</li>;
+          })}
+      </ul>
+    </div>
   );
 };
 
