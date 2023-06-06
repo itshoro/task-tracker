@@ -6,27 +6,27 @@ function usePersistedState<TValue>(
   defaultValue: TValue,
   isPersistedDataValid?: (persisted: any) => persisted is TValue
 ) {
-  const pending = useRef(true);
+  const [pending, setPending] = useState(true);
   const [value, setValue] = useState<TValue>(defaultValue);
 
   useEffect(() => {
     const persistedValue = localStorage.getItem(key);
-    if (persistedValue === null) return;
+    if (persistedValue === null) {
+      setPending(false);
+      setValue(defaultValue);
+      return;
+    }
 
     try {
       const parsed = JSON.parse(persistedValue);
 
       if (isPersistedDataValid === undefined) {
         console.warn("Persisted value couldn't be validated.");
-        setValue(() => {
-          pending.current = false;
-          return parsed;
-        });
+        setPending(false);
+        setValue(parsed);
       } else if (isPersistedDataValid(parsed)) {
-        setValue(() => {
-          pending.current = false;
-          return parsed;
-        });
+        setPending(false);
+        setValue(parsed);
       } else {
         throw new Error(
           "Data is not valid or has been potentially tampered with."
@@ -41,7 +41,7 @@ function usePersistedState<TValue>(
     localStorage.setItem(key, JSON.stringify(value));
   }, [key, value]);
 
-  return [pending.current, value, setValue] as const;
+  return [pending, value, setValue] as const;
 }
 
 export default usePersistedState;
