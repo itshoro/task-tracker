@@ -1,3 +1,4 @@
+import { setPersistedColorScheme } from "../lib/colorScheme";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -14,14 +15,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-neutral-50 dark:bg-neutral-900 h-full">
-      <body className={`h-full ${inter.className}`}>
-        <div
-          className="max-w-6xl mx-auto h-full grid gap-8"
-          style={{ gridTemplateRows: "auto minmax(0, 1fr)" }}
-        >
-          {children}
-        </div>
+    <html lang="en" className="">
+      <body className={`bg-neutral-50 dark:bg-neutral-900 ${inter.className}`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(${setPersistedColorScheme.toString()})()`,
+          }}
+        />
+
+        <div className="mx-auto max-w-6xl">{children}</div>
       </body>
     </html>
   );

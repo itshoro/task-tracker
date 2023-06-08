@@ -10,9 +10,9 @@ type InputProps = ComponentPropsWithoutRef<"input">;
 const TaskInput = forwardRef(
   (props: InputProps, ref: ForwardedRef<HTMLInputElement>) => {
     return (
-      <div className="rounded-xl bg-white dark:bg-neutral-800 shadow transition ring-offset-neutral-900 focus-within:ring-2 ring-stone-700 dark:ring-stone-700 ring-offset-2 relative flex-1">
+      <div className="relative flex-1 rounded-xl bg-white shadow ring-stone-700 ring-offset-2 ring-offset-neutral-50 transition focus-within:ring-2 dark:bg-neutral-800 dark:ring-stone-700 dark:ring-offset-neutral-900">
         <label className="flex items-center pl-3">
-          <span className="font-medium text-lg text-stone-400">+</span>
+          <span className="text-lg font-medium text-stone-400">+</span>
 
           <input
             autoFocus={true}
@@ -20,7 +20,7 @@ const TaskInput = forwardRef(
             spellCheck="false"
             autoComplete="off"
             aria-autocomplete="both"
-            className="rounded-xl w-full p-2 py-3 outline-none bg-transparent dark:text-stone-400 dark:placeholder-stone-600"
+            className="w-full rounded-xl bg-transparent p-2 py-3 outline-none dark:text-stone-400 dark:placeholder-stone-600"
             ref={ref}
             {...props}
             type="text"

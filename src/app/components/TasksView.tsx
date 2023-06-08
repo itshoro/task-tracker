@@ -137,7 +137,7 @@ const TasksView = () => {
   return (
     <>
       <section className="px-6">
-        <div className="text-center py-8">
+        <div className="py-8 text-center">
           <CumulativeTimer tasks={tasks} />
         </div>
         <form onSubmit={submitNewTask}>
@@ -149,19 +149,19 @@ const TasksView = () => {
       ) : (
         <>
           <section className="overflow-y-scroll">
-            <header className="sticky top-0 pointer-events-none z-40">
-              <div className="text-sm font-medium text-stone-400 bg-stone-50 dark:bg-neutral-900 px-6">
-                <div className="border-b dark:border-stone-700 flex justify-between pb-2">
+            <header className="pointer-events-none sticky top-0 z-40">
+              <div className="bg-stone-50 px-6 text-sm font-medium text-stone-400 dark:bg-neutral-900">
+                <div className="flex justify-between border-b pb-2 dark:border-stone-700">
                   <span>Task</span>
                   <span>Time Elapsed</span>
                 </div>
               </div>
               <div className="absolute h-8 w-full bg-gradient-to-b from-stone-50 dark:from-neutral-900" />
             </header>
-            <div className="fixed h-8 bottom-0 w-full bg-gradient-to-t from-stone-50 dark:from-neutral-900 pointer-events-none" />
+            <div className="pointer-events-none fixed bottom-0 h-8 w-full bg-gradient-to-t from-stone-50 dark:from-neutral-900" />
 
             <ol
-              className="py-8 px-6"
+              className="px-6 py-8"
               ref={listRef}
               onBlur={(e) => {
                 if (
@@ -225,14 +225,14 @@ const TasksView = () => {
 
 const TasksPending = () => {
   return (
-    <div className="pt-24 px-6 pb-24 space-y-4 overflow-hidden">
+    <div className="space-y-4 overflow-hidden px-6 pb-24 pt-24">
       <div className="sr-only">Loading...</div>
       {Array(5)
         .fill(0)
         .map((_, i) => (
           <div
             key={i}
-            className="h-12 w-full rounded-xl bg-stone-800 animate-pulse"
+            className="h-12 w-full animate-pulse rounded-xl bg-stone-800"
           />
         ))}
     </div>
