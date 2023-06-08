@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 function usePersistedState<TValue>(
   key: string,
   defaultValue: TValue,
-  isPersistedDataValid?: (persisted: any) => persisted is TValue
+  isPersistedDataValid?: (persisted: any) => persisted is TValue,
+  storeRaw?: boolean
 ) {
   const [pending, setPending] = useState(true);
   const [value, setValue] = useState<TValue>(defaultValue);
@@ -18,7 +19,7 @@ function usePersistedState<TValue>(
     }
 
     try {
-      const parsed = JSON.parse(persistedValue);
+      const parsed = storeRaw ? persistedValue : JSON.parse(persistedValue);
 
       if (isPersistedDataValid === undefined) {
         console.warn("Persisted value couldn't be validated.");
@@ -38,8 +39,13 @@ function usePersistedState<TValue>(
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
+    if (!pending) {
+      localStorage.setItem(
+        key,
+        storeRaw ? (value as string) : JSON.stringify(value)
+      );
+    }
+  }, [key, value, pending]);
 
   return [pending, value, setValue] as const;
 }
